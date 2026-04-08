@@ -490,9 +490,82 @@
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  /* PASSWORD MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 2.5rem;
+    width: min(400px, 90vw);
+    text-align: center;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+  }
+
+  .modal-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+  .modal-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.4rem; }
+  .modal-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 1.5rem; }
+
+  .modal-input {
+    width: 100%; padding: 0.8rem 1rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text);
+    font-family: 'Space Mono', monospace; font-size: 0.95rem;
+    letter-spacing: 0.2em; text-align: center; outline: none;
+    margin-bottom: 1rem; transition: border-color 0.3s;
+  }
+  .modal-input:focus { border-color: var(--accent); }
+  .modal-input.error { border-color: #ef4444; animation: shake 0.4s ease; }
+
+  @keyframes shake {
+    0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)}
+  }
+
+  .modal-actions { display: flex; gap: 0.8rem; }
+
+  .modal-cancel {
+    flex: 1; padding: 0.75rem;
+    background: transparent; border: 1px solid var(--border);
+    border-radius: 10px; color: var(--muted);
+    font-family: 'Syne', sans-serif; font-size: 0.9rem;
+    cursor: pointer; transition: border-color 0.3s;
+  }
+  .modal-cancel:hover { border-color: var(--text); color: var(--text); }
+
+  .modal-confirm {
+    flex: 2; padding: 0.75rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; border-radius: 10px; color: #fff;
+    font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .modal-confirm:hover { opacity: 0.9; }
+
+  .modal-error { color: #ef4444; font-size: 0.8rem; margin-top: 0.6rem; display: none; }
 </style>
 </head>
 <body>
+
+<!-- MODAL PASSWORD -->
+<div class="modal-overlay" id="docModal">
+  <div class="modal-box">
+    <div class="modal-icon" id="modalIcon">📄</div>
+    <div class="modal-title" id="modalTitle">Document protégé</div>
+    <div class="modal-sub">Entrez le mot de passe pour accéder au document.</div>
+    <input type="password" class="modal-input" id="modalInput" placeholder="••••••••" maxlength="20" />
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">Annuler</button>
+      <button class="modal-confirm" onclick="checkDoc()">Accéder →</button>
+    </div>
+    <div class="modal-error" id="modalError">Mot de passe incorrect.</div>
+  </div>
+</div>
 
 <!-- NAV -->
 <nav>
@@ -734,29 +807,29 @@
 <section id="docs" style="padding-top: 0;">
   <div class="section-label">Documents Officiels</div>
   <h2 class="section-title">CV & Documents</h2>
-  <p class="section-desc">Mes documents professionnels disponibles en téléchargement direct.</p>
+  <p class="section-desc">Mes documents professionnels, accessibles après authentification.</p>
   <div class="docs-grid">
 
-    <a class="doc-card fade-in" href="CV_MAKHLOUF_SAID.pdf" target="_blank">
+    <div class="doc-card fade-in" onclick="openModal('cv')">
       <div class="doc-icon">📋</div>
       <div class="doc-title">Curriculum Vitae</div>
       <div class="doc-desc">CV complet — Compétences, expériences, formations et certifications.</div>
-      <div class="doc-btn">📄 Voir le CV</div>
-    </a>
+      <div class="doc-btn">🔒 Accéder au CV</div>
+    </div>
 
-    <a class="doc-card fade-in" href="TS_MAKHLOUF_SAID.pdf" target="_blank">
+    <div class="doc-card fade-in" onclick="openModal('ts')">
       <div class="doc-icon">📊</div>
       <div class="doc-title">Tableau de Synthèse</div>
       <div class="doc-desc">Tableau de synthèse E5 – BTS SIO SISR (ANNEXE VI.1).</div>
-      <div class="doc-btn">📄 Voir le tableau</div>
-    </a>
+      <div class="doc-btn">🔒 Accéder au tableau</div>
+    </div>
 
-    <a class="doc-card fade-in" href="CTX_MAKHLOUF_SAID.pdf" target="_blank">
+    <div class="doc-card fade-in" onclick="openModal('ctx')">
       <div class="doc-icon">📁</div>
       <div class="doc-title">Dossier BTS SIO</div>
       <div class="doc-desc">Fiches de réalisation et contexte projet E5 – BTS SIO SISR.</div>
-      <div class="doc-btn">📄 Voir le dossier</div>
-    </a>
+      <div class="doc-btn">🔒 Accéder au dossier</div>
+    </div>
 
   </div>
 </section>
@@ -883,7 +956,7 @@
       <p>Je cherche une alternance pour un Bachelor Systèmes, Réseaux & Cloud. N'hésitez pas à me contacter pour toute opportunité en Île-de-France.</p>
       <div class="contact-links">
         <a href="tel:0667700598" class="contact-link"><span>📞</span><span>06 67 70 05 98</span></a>
-        <a href="mailto:s.makhlouf@lprs.fr" class="contact-link"><span>✉️</span><span>s.makhlouf@lprs.fr</span></a>
+        <a href="/cdn-cgi/l/email-protection#0e7d20636f656662617b684e627e7c7d20687c" class="contact-link"><span>✉️</span><span><span class="__cf_email__" data-cfemail="8dfea3e0ece6e5e1e2f8ebcde1fdfffea3ebff">[email&#160;protected]</span></span></a>
         <a href="#" class="contact-link"><span>🚗</span><span>Permis B – Mobile</span></a>
       </div>
     </div>
@@ -911,17 +984,63 @@
   <p style="margin-top:0.4rem;">Étudiant en alternance · CCNA 1 & 2 · Cisco · Windows Server · Linux · Virtualisation</p>
 </footer>
 
-<script>
-  // ANIMATIONS
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  const PASSWORD = 'said93';
+
+  const docMeta = {
+    cv:  { icon: '📋', title: 'Curriculum Vitae',    file: 'CV_MAKHLOUF_SAID.pdf' },
+    ts:  { icon: '📊', title: 'Tableau de Synthèse', file: 'TS_MAKHLOUF_SAID.pdf' },
+    ctx: { icon: '📁', title: 'Dossier BTS SIO',     file: 'CTX_MAKHLOUF_SAID.pdf' }
+  };
+
+  let currentDoc = null;
+
+  function openModal(docType) {
+    currentDoc = docType;
+    const meta = docMeta[docType];
+    document.getElementById('modalIcon').textContent = meta.icon;
+    document.getElementById('modalTitle').textContent = meta.title;
+    document.getElementById('modalInput').value = '';
+    document.getElementById('modalError').style.display = 'none';
+    document.getElementById('modalInput').classList.remove('error');
+    document.getElementById('docModal').classList.add('open');
+    setTimeout(() => document.getElementById('modalInput').focus(), 100);
+  }
+
+  function closeModal() {
+    document.getElementById('docModal').classList.remove('open');
+    currentDoc = null;
+  }
+
+  function checkDoc() {
+    const val = document.getElementById('modalInput').value;
+    const input = document.getElementById('modalInput');
+    const err = document.getElementById('modalError');
+    if (val === PASSWORD) {
+      const file = docMeta[currentDoc].file;
+      closeModal();
+      window.open(file, '_blank');
+    } else {
+      input.classList.add('error');
+      err.style.display = 'block';
+      setTimeout(() => input.classList.remove('error'), 500);
+    }
+  }
+
+  document.getElementById('modalInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkDoc();
+  });
+
+  document.getElementById('docModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('docModal')) closeModal();
+  });
+
   function initAnimations() {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
+        if (entry.isIntersecting) entry.target.classList.add('visible');
       });
     }, { threshold: 0.1 });
-
     document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
   }
 
